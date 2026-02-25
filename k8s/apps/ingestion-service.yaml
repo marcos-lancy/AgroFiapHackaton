@@ -1,0 +1,99 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ingestion-service
+  namespace: agrosolutions-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ingestion-service
+  template:
+    metadata:
+      labels:
+        app: ingestion-service
+    spec:
+      containers:
+        - name: ingestion-service
+          image: ghcr.io/placeholder/agrosolutions-ingestion-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: http
+          envFrom:
+            - configMapRef:
+                name: app-config
+          env:
+            - name: ConnectionStrings__MongoDb
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: mongodb-conn
+            - name: MessageBroker__Host
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: rabbitmq-host
+            - name: MessageBroker__Username
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: rabbitmq-username
+            - name: MessageBroker__Password
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: rabbitmq-password
+            - name: JwtSettings__SecretKey
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: jwt-secret-key
+            - name: JwtSettings__Issuer
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: jwt-issuer
+            - name: JwtSettings__Audience
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: jwt-audience
+            - name: JwtSettings__ExpirationMinutes
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: jwt-expiration-minutes
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ingestion-service
+  namespace: agrosolutions-app
+spec:
+  selector:
+    app: ingestion-service
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+

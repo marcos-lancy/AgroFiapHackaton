@@ -1,0 +1,21 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../
+images:
+  - name: ghcr.io/placeholder/agrosolutions-identity-service
+    newName: agrosolutions/identity-service
+    newTag: local
+  - name: ghcr.io/placeholder/agrosolutions-properties-service
+    newName: agrosolutions/properties-service
+    newTag: local
+  - name: ghcr.io/placeholder/agrosolutions-ingestion-service
+    newName: agrosolutions/ingestion-service
+    newTag: local
+  - name: ghcr.io/placeholder/agrosolutions-analytics-service
+    newName: agrosolutions/analytics-service
+    newTag: local
+  - name: ghcr.io/placeholder/agrosolutions-analytics-worker
+    newName: agrosolutions/analytics-worker
+    newTag: local
+

@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: identity-service
+  namespace: agrosolutions-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: identity-service
+  template:
+    metadata:
+      labels:
+        app: identity-service
+    spec:
+      containers:
+        - name: identity-service
+          image: ghcr.io/placeholder/agrosolutions-identity-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: http
+          envFrom:
+            - configMapRef:
+                name: app-config
+          env:
+            - name: ConnectionStrings__DefaultConnection
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: postgres-identity-conn
+            - name: JwtSettings__SecretKey
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: jwt-secret-key
+            - name: JwtSettings__Issuer
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: jwt-issuer
+            - name: JwtSettings__Audience
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: jwt-audience
+            - name: JwtSettings__ExpirationMinutes
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: jwt-expiration-minutes
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: identity-service
+  namespace: agrosolutions-app
+spec:
+  selector:
+    app: identity-service
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+

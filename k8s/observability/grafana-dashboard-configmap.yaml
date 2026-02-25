@@ -1,0 +1,68 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboards
+  namespace: agrosolutions-observability
+data:
+  microservices.json: |
+    {
+      "annotations": { "list": [] },
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 0,
+      "panels": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
+          "id": 1,
+          "targets": [
+            {
+              "expr": "rate(http_requests_received_total{job=~\".*-service\"}[5m])",
+              "legendFormat": "{{job}} - {{method}} {{path}}",
+              "refId": "A"
+            }
+          ],
+          "title": "HTTP Request Rate",
+          "type": "timeseries"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+          "id": 2,
+          "targets": [
+            {
+              "expr": "process_cpu_seconds_total{job=~\".*-service\"}",
+              "legendFormat": "{{job}}",
+              "refId": "A"
+            }
+          ],
+          "title": "CPU by Service",
+          "type": "timeseries"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+          "id": 3,
+          "targets": [
+            {
+              "expr": "process_resident_memory_bytes{job=~\".*-service\"}",
+              "legendFormat": "{{job}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Memory by Service",
+          "type": "timeseries"
+        }
+      ],
+      "refresh": "10s",
+      "schemaVersion": 38,
+      "style": "dark",
+      "tags": ["agrosolutions", "microservices"],
+      "templating": { "list": [] },
+      "time": { "from": "now-15m", "to": "now" },
+      "timezone": "",
+      "title": "AgroSolutions - MVP Overview",
+      "uid": "agrosolutions-mvp",
+      "version": 1
+    }
+

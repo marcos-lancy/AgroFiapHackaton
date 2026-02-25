@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: analytics-worker
+  namespace: agrosolutions-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: analytics-worker
+  template:
+    metadata:
+      labels:
+        app: analytics-worker
+    spec:
+      containers:
+        - name: analytics-worker
+          image: ghcr.io/placeholder/agrosolutions-analytics-worker:latest
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: app-config
+          env:
+            - name: ConnectionStrings__DefaultConnection
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: postgres-analytics-conn
+            - name: ConnectionStrings__MongoDb
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: mongodb-conn
+            - name: MessageBroker__Host
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: rabbitmq-host
+            - name: MessageBroker__Username
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: rabbitmq-username
+            - name: MessageBroker__Password
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: rabbitmq-password
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - "cat /proc/1/cmdline | grep -q AgroSolutions.Analytics.Service.Worker.dll"
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          livenessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - "cat /proc/1/cmdline | grep -q AgroSolutions.Analytics.Service.Worker.dll"
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+

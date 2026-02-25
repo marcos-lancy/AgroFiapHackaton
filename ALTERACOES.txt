@@ -1,0 +1,36 @@
+ 1. Corrigir conexão RabbitMQ do Ingestion (obrigatório)
+  Arquivo: Program.cs (AgroSolutionsIngestion\src\AgroSolutions.Ingestion.Service.Api\Program.cs)
+  - Hoje está fixo em cfg.Host("localhost", 5672, "/", ...).
+  - Precisa usar rabbitMqHost, rabbitMqUsername, rabbitMqPassword lidos da configuração.
+  - Sem isso, no Kubernetes o Ingestion não conecta no RabbitMQ.
+
+  2. Ajustar path do Dockerfile no workflow (obrigatório)
+  Arquivo: cicd-k8s.yml (github\workflows\cicd-k8s.yml)
+  - No build-push-action, com context: AgroSolutionsIdentity, o file deve ser Dockerfile, não groSolutionsIdentity/Dockerfile.
+  - Do jeito atual, o build tende a falhar por caminho inválido.
+
+  3. Trocar imagens placeholder para deploy real no cluster (obrigatório para CI/CD real)
+   Arquivos:
+  - identity-service.yaml (infra\k8s\apps\identity-service.yaml)
+  - properties-service.yaml (\infra\k8s\apps\properties-service.yaml)
+  - ingestion-service.yaml (\infra\k8s\apps\ingestion-service.yaml)
+  - analytics-service.yaml (\infra\k8s\apps\analytics-service.yaml)
+  - analytics-worker.yaml (\infra\k8s\apps\analytics-worker.yaml)
+  - Substituir ghcr.io/placeholder/... por o registry real, ou depender sempre de kubectl set image no pipeline.
+
+  4. Definir estratégia de pull de imagem privada GHCR 
+  Arquivos: manifests de infra/k8s/apps/*.yaml
+  - Se imagens GHCR estiverem privadas, adicionar imagePullSecrets no namespace/app.
+  - Alternativa: tornar pacotes públicos.
+
+  5. Garantir migrações de banco no Kubernetes
+  - O código não aplica migração automaticamente.
+
+  6. Melhorar PV hostPath para evitar erro de mount (recomendado forte)
+     Arquivos:
+  - postgres-storage.yaml (infra\k8s\platform\postgres-storage.yaml)
+  - mongodb-storage.yaml (\infra\k8s\platform\mongodb-storage.yaml)
+  - rabbitmq-storage.yaml (infra\k8s\platform\rabbitmq-storage.yaml)
+  - prometheus-storage.yaml (infra\k8s\platform\prometheus-storage.yaml)
+  - grafana-storage.yaml (\infra\k8s\platform\grafana- storage.yaml)
+  - Adicionar type: DirectoryOrCreate em hostPath para garantir criação de diretórios no nó.
