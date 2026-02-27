@@ -13,9 +13,14 @@ spec:
       labels:
         app: prometheus
     spec:
+      securityContext:
+        fsGroup: 0
       containers:
         - name: prometheus
           image: prom/prometheus:latest
+          securityContext:
+            runAsUser: 0
+            runAsGroup: 0
           args:
             - "--config.file=/etc/prometheus/prometheus.yml"
             - "--storage.tsdb.path=/prometheus"

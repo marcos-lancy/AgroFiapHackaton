@@ -6,4 +6,5 @@ resources:
   - ingestion-service.yaml
   - analytics-service.yaml
   - analytics-worker.yaml
+  - dashboard-service.yaml
 

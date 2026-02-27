@@ -25,6 +25,14 @@ minikube start --cpus=4 --memory=8192
 kubectl config use-context minikube
 ```
 
+## 1.1 Acessar o Dashboard do Minikube (Opcional)
+
+O Minikube possui um dashboard visual para gerenciar o cluster:
+
+```bash
+minikube dashboard
+```
+
 ## 2. Apontar o Docker para o daemon do Minikube
 
 ### Linux/macOS (bash)
@@ -49,12 +57,13 @@ docker build -t agrosolutions/properties-service:local -f AgroSolutionsPropertie
 docker build -t agrosolutions/ingestion-service:local -f AgroSolutionsIngestion/Dockerfile AgroSolutionsIngestion
 docker build -t agrosolutions/analytics-service:local -f AgroSolutionAnalytics/Dockerfile AgroSolutionAnalytics
 docker build -t agrosolutions/analytics-worker:local -f AgroSolutionAnalytics/Dockerfile.Worker AgroSolutionAnalytics
+docker build -t agrosolutions/dashboard-service:local -f AgroSolutionsDashboard/Dockerfile AgroSolutionsDashboard
 ```
 
 ## 4. Aplicar os manifests no Kubernetes
 
 ```bash
-kubectl apply -k infra/k8s/overlays/local
+kubectl apply -k k8s/overlays/local
 ```
 
 ## 5. Validar a subida dos componentes
@@ -82,6 +91,7 @@ kubectl -n agrosolutions-app port-forward svc/identity-service 5001:8080
 kubectl -n agrosolutions-app port-forward svc/properties-service 5002:8080
 kubectl -n agrosolutions-app port-forward svc/ingestion-service 5003:8080
 kubectl -n agrosolutions-app port-forward svc/analytics-service 5004:8080
+kubectl -n agrosolutions-app port-forward svc/dashboard-service 5005:80
 kubectl -n agrosolutions-observability port-forward svc/prometheus 9090:9090
 kubectl -n agrosolutions-observability port-forward svc/grafana 3001:3000
 ```
@@ -92,6 +102,7 @@ URLs:
 - Properties Swagger: `http://localhost:5002/swagger`
 - Ingestion Swagger: `http://localhost:5003/swagger`
 - Analytics Swagger: `http://localhost:5004/swagger`
+- Dashboard: `http://localhost:5005`
 - Prometheus: `http://localhost:9090`
 - Grafana: `http://localhost:3001` (usuario `admin`, senha `admin`)
 
@@ -120,7 +131,7 @@ kubectl rollout restart deployment/identity-service -n agrosolutions-app
 Remover tudo do Kubernetes:
 
 ```bash
-kubectl delete -k infra/k8s/overlays/local
+kubectl delete -k k8s/overlays/local
 ```
 
 Excluir cluster Minikube:
