@@ -1,5 +1,11 @@
 # Infraestrutura MVP no Minikube
 
+## Imagens de Fluxos
+
+```
+/doc
+```
+
 ## Estrutura de manifests
 
 ```
